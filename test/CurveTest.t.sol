@@ -6,7 +6,6 @@ import "../src/CurveFi.sol";
 import "../interfaces/cinterface.sol";
 import {IERC20} from "openzeppelin-contracts/interfaces/IERC20.sol";
 import {SafeERC20} from "openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
-
 contract CounterTest is Test {
     using SafeERC20 for IERC20;
 
@@ -38,7 +37,7 @@ contract CounterTest is Test {
 
     function mintUserTestCoins() internal {
         dai.approve(address(curve), type(uint256).max);
-        usdc.approve(address(curve), type(uint256).max);    
+        usdc.approve(address(curve), type(uint256).max);
         usdt.safeApprove(address(curve), type(uint256).max);
 
         console.log(usdt.totalSupply());
@@ -58,16 +57,16 @@ contract CounterTest is Test {
         path[1] = address(dai);
         v2router.swapETHForExactTokens{value: 3 ether}(3_000 * 1e18, path, testUser, type(uint256).max);
         console.log("DAI BALANCE AFTER SWAP: ", dai.balanceOf(testUser) / 1e18);
+    }
 
-       uint[3] memory amounts;
-       amounts[0] = 3000 * 1e18;
-       amounts[1] = 3000 * 1e6;
-       amounts[2] = 3000 * 1e6;
-
+    function testAddLiquidityToCurve() external {
+        uint256[3] memory amounts;
+        amounts[0] = 3000 * 1e18;
+        amounts[1] = 3000 * 1e6;
+        amounts[2] = 3000 * 1e6;
 
         curve.add_liquidity(amounts, 1);
         console.log("LP TOKENS RECEIVED: ", pool3Lp.balanceOf(testUser) / 1e18);
     }
-
 
 }
