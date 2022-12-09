@@ -37,8 +37,6 @@ contract CounterTest is Test {
     }
 
     function mintUserTestCoins() internal {
-        dai.approve(address(v2router), type(uint256).max);
-        usdc.approve(address(v2router), type(uint256).max);
         dai.approve(address(curve), type(uint256).max);
         usdc.approve(address(curve), type(uint256).max);    
         usdt.safeApprove(address(curve), type(uint256).max);
