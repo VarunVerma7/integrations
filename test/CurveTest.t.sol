@@ -51,28 +51,25 @@ contract CounterTest is Test {
         path[1] = address(usdc);
 
         v2router.swapETHForExactTokens{value: 3 ether}(3_000 * 1e6, path, testUser, type(uint256).max);
-        console.log("USDC BALANCE AFTER SWAP: ", usdc.balanceOf(testUser) / 10e6);
+        console.log("USDC BALANCE AFTER SWAP: ", usdc.balanceOf(testUser) / 1e6);
 
         path[1] = address(usdt);
         v2router.swapETHForExactTokens{value: 3 ether}(3_000 * 1e6, path, testUser, type(uint256).max);
-        console.log("USDT BALANCE AFTER SWAP: ", usdt.balanceOf(testUser) / 10e6);
+        console.log("USDT BALANCE AFTER SWAP: ", usdt.balanceOf(testUser) / 1e6);
 
         path[1] = address(dai);
         v2router.swapETHForExactTokens{value: 3 ether}(3_000 * 1e18, path, testUser, type(uint256).max);
-        console.log("DAI BALANCE AFTER SWAP: ", dai.balanceOf(testUser) / 10e18);
+        console.log("DAI BALANCE AFTER SWAP: ", dai.balanceOf(testUser) / 1e18);
 
        uint[3] memory amounts;
-       amounts[0] = 300 * 1e18;
-       amounts[1] = 300 * 1e6;
-       amounts[2] = 300 * 1e6;
+       amounts[0] = 3000 * 1e18;
+       amounts[1] = 3000 * 1e6;
+       amounts[2] = 3000 * 1e6;
 
 
         curve.add_liquidity(amounts, 1);
         console.log("LP TOKENS RECEIVED: ", pool3Lp.balanceOf(testUser) / 1e18);
     }
 
-    function testAddLiquid() public {
-        console.log(dai.totalSupply());
-        console.log(curve.get_dy(1, 2, 3));
-    }
+
 }
