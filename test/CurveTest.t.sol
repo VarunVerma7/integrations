@@ -6,12 +6,16 @@ import "../src/CurveFi.sol";
 import "../interfaces/cinterface.sol";
 import {IERC20} from "openzeppelin-contracts/interfaces/IERC20.sol";
 import {SafeERC20} from "openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
-contract CounterTest is Test {
+import {IVault} from "balancer-v2-monorepo/pkg/interfaces/contracts/vault/IVault.sol";
+import {IFlashLoanRecipient} from "balancer-v2-monorepo/pkg/interfaces/contracts/vault/IFlashLoanRecipient.sol";
+
+contract CounterTest is Test, IFlashLoanRecipient {
     using SafeERC20 for IERC20;
 
     Curve3Pool public curve;
     SwapRouterInterface public swapRouter;
     UniswapV2Router public v2router;
+    IVault public balancerVault;
     IERC20 public usdc;
     IERC20 public usdt;
     IERC20 public dai;
@@ -24,6 +28,7 @@ contract CounterTest is Test {
 
         vm.startPrank(testUser);
         vm.rollFork(13848982);
+        balancerVault = IVault(0xBA12222222228d8Ba445958a75a0704d566BF2C8);
         pool3Lp = IERC20(0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490);
         curve = Curve3Pool(0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7);
         dai = IERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F);
@@ -69,4 +74,28 @@ contract CounterTest is Test {
         console.log("LP TOKENS RECEIVED: ", pool3Lp.balanceOf(testUser) / 1e18);
     }
 
+    function testBalancerFlashLoan() external {
+        IERC20[] memory tokens = new IERC20[](1);
+        tokens[0] = usdc;
+
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 1_000_000;
+
+        uint256[] memory feeAmounts = new uint256[](1);
+        feeAmounts[0] = 1_000_000;
+
+        bytes memory userData = "";
+
+        balancerVault.flashLoan(IFlashLoanRecipient(this), tokens, amounts, userData);
+    }
+
+    function receiveFlashLoan(
+        IERC20[] memory tokens,
+        uint256[] memory amounts,
+        uint256[] memory feeAmounts,
+        bytes memory userData
+    ) external {
+        // require(msg.sender == "0xBA12222222228d8Ba445958a75a0704d566BF2C8");
+        usdc.transfer(address(balancerVault), 10_000_000);
+    }
 }
