@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity >=0.7.0 <0.9.0;
 
 import "forge-std/Test.sol";
 import "../src/CurveFi.sol";
@@ -8,14 +8,21 @@ import {IERC20} from "openzeppelin-contracts/interfaces/IERC20.sol";
 import {SafeERC20} from "openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
 import {IVault} from "balancer-v2-monorepo/pkg/interfaces/contracts/vault/IVault.sol";
 import {IFlashLoanRecipient} from "balancer-v2-monorepo/pkg/interfaces/contracts/vault/IFlashLoanRecipient.sol";
-
-contract CounterTest is Test, IFlashLoanRecipient {
+interface IBalancerVault {
+  function flashLoan(
+    address recipient,
+    address[] memory tokens,
+    uint256[] memory amounts,
+    bytes memory userData
+  ) external;
+}
+contract CounterTest is Test {
     using SafeERC20 for IERC20;
 
     Curve3Pool public curve;
     SwapRouterInterface public swapRouter;
     UniswapV2Router public v2router;
-    IVault public balancerVault;
+    IBalancerVault public balancerVault;
     IERC20 public usdc;
     IERC20 public usdt;
     IERC20 public dai;
@@ -28,7 +35,7 @@ contract CounterTest is Test, IFlashLoanRecipient {
 
         vm.startPrank(testUser);
         vm.rollFork(13848982);
-        balancerVault = IVault(0xBA12222222228d8Ba445958a75a0704d566BF2C8);
+        balancerVault = IBalancerVault(0xBA12222222228d8Ba445958a75a0704d566BF2C8);
         pool3Lp = IERC20(0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490);
         curve = Curve3Pool(0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7);
         dai = IERC20(0x6B175474E89094C44Da98b954EedeAC495271d0F);
@@ -52,15 +59,15 @@ contract CounterTest is Test, IFlashLoanRecipient {
         path[0] = address(weth);
         path[1] = address(usdc);
 
-        v2router.swapETHForExactTokens{value: 3 ether}(3_000 * 1e6, path, testUser, type(uint256).max);
+        v2router.swapETHForExactTokens{value: 1000 ether}(1_000_000 * 1e6, path, testUser, type(uint256).max);
         console.log("USDC BALANCE AFTER SWAP: ", usdc.balanceOf(testUser) / 1e6);
 
         path[1] = address(usdt);
-        v2router.swapETHForExactTokens{value: 3 ether}(3_000 * 1e6, path, testUser, type(uint256).max);
+        v2router.swapETHForExactTokens{value: 100 ether}(100_000 * 1e6, path, testUser, type(uint256).max);
         console.log("USDT BALANCE AFTER SWAP: ", usdt.balanceOf(testUser) / 1e6);
 
         path[1] = address(dai);
-        v2router.swapETHForExactTokens{value: 3 ether}(3_000 * 1e18, path, testUser, type(uint256).max);
+        v2router.swapETHForExactTokens{value: 100 ether}(100_000 * 1e18, path, testUser, type(uint256).max);
         console.log("DAI BALANCE AFTER SWAP: ", dai.balanceOf(testUser) / 1e18);
     }
 
@@ -70,13 +77,13 @@ contract CounterTest is Test, IFlashLoanRecipient {
         amounts[1] = 3000 * 1e6;
         amounts[2] = 3000 * 1e6;
 
-        curve.add_liquidity(amounts, 1);
-        console.log("LP TOKENS RECEIVED: ", pool3Lp.balanceOf(testUser) / 1e18);
+        // curve.add_liquidity(amounts, 1);
+        // console.log("LP TOKENS RECEIVED: ", pool3Lp.balanceOf(testUser) / 1e18);
     }
 
     function testBalancerFlashLoan() external {
-        IERC20[] memory tokens = new IERC20[](1);
-        tokens[0] = usdc;
+        address[] memory tokens = new address[](1);
+        tokens[0] = address(usdc);
 
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 1_000_000;
@@ -86,7 +93,7 @@ contract CounterTest is Test, IFlashLoanRecipient {
 
         bytes memory userData = "";
 
-        balancerVault.flashLoan(IFlashLoanRecipient(this), tokens, amounts, userData);
+        balancerVault.flashLoan(address(this), tokens, amounts, userData);
     }
 
     function receiveFlashLoan(
@@ -94,8 +101,8 @@ contract CounterTest is Test, IFlashLoanRecipient {
         uint256[] memory amounts,
         uint256[] memory feeAmounts,
         bytes memory userData
-    ) external {
-        // require(msg.sender == "0xBA12222222228d8Ba445958a75a0704d566BF2C8");
-        usdc.transfer(address(balancerVault), 10_000_000);
+    ) external   {
+        console.log("USDC BALANCE: ", usdc.balanceOf(address(this)));
+        usdc.transfer(address(balancerVault), 1e6);
     }
 }
