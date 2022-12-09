@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 pragma experimental ABIEncoderV2;
 
 interface Curve3Pool { 
-    function add_liquidity(uint256[4] calldata uamounts, uint256 min_mint_amount) external;
+    function add_liquidity(uint256[3] memory uamounts, uint256 min_mint_amount) external;
     function get_dy(int128 i, int128 j, uint256 dx) external view returns (uint256);
 }
 interface ISwapRouter {
