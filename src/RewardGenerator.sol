@@ -9,13 +9,12 @@ error InsufficientBalance();
 contract StakeCoin {
     IERC20Mintable public immutable stakeCoin;
     IERC20Mintable public immutable rewardCoin;
-    mapping (address => uint) public stakedAmounts;
+    mapping(address => uint256) public stakedAmounts;
 
     constructor(address _stakeCoin, address _rewardCoin) {
         stakeCoin = IERC20Mintable(_stakeCoin);
         rewardCoin = IERC20Mintable(_rewardCoin);
     }
-
 
     function stakeToken(uint256 amount) external {
         if (stakeCoin.allowance(msg.sender, address(this)) <= amount) {
@@ -31,8 +30,7 @@ contract StakeCoin {
             revert InsufficientBalance();
         }
 
-
-        uint amount = stakedAmounts[msg.sender];
+        uint256 amount = stakedAmounts[msg.sender];
         stakedAmounts[msg.sender] = stakedAmounts[msg.sender] - amount;
 
         stakeCoin.transfer(msg.sender, amount);

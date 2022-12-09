@@ -7,18 +7,17 @@ import {Ownable} from "openzeppelin-contracts/access/Ownable.sol";
 contract Coin is ERC20, Ownable {
     uint256 public constant MAX_SUPPLY = 1_000_000 * 10e18;
 
-    constructor(string memory name, string memory symbol) ERC20(name, symbol) {
-    }
+    constructor(string memory name, string memory symbol) ERC20(name, symbol) {}
 
-    function mint(address _to, uint _amount) external onlyOwner {
+    function mint(address _to, uint256 _amount) external onlyOwner {
         _mint(_to, _amount);
     }
-
 }
 
 interface IERC20Mintable {
-    function mint(address _to, uint _amount) external;
+    function mint(address _to, uint256 _amount) external;
     /// @dev Emitted when `value` tokens are moved from one account (`from`) to another (`to`).
+
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     /// @dev Emitted when the allowance of a `spender` for an `owner` is set, where `value`
