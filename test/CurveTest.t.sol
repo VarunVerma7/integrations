@@ -11,7 +11,7 @@ import {IFlashLoanRecipient} from "balancer-v2-monorepo/pkg/interfaces/contracts
 interface IBalancerVault {
   function flashLoan(
     address recipient,
-    address[] memory tokens,
+    IERC20[] memory tokens,
     uint256[] memory amounts,
     bytes memory userData
   ) external;
@@ -84,8 +84,8 @@ contract CounterTest is Test {
     }
 
     function testBalancerFlashLoan() external {
-        address[] memory tokens = new address[](1);
-        tokens[0] = address(usdc);
+        IERC20[] memory tokens = new IERC20[](1);
+        tokens[0] = (usdc);
 
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = 1_000_000 * 1e6;
@@ -105,9 +105,10 @@ contract CounterTest is Test {
         bytes memory userData
     ) external   {
         console.log("USDC BALANCE AFTER FLASH LOAN ", usdc.balanceOf(address(this)) / 1e6);
-        usdc.transfer(address(balancerVault), 1_999_999 * 1e6);
+        usdc.transfer(address(balancerVault), 1_000_000 * 1e6);
     }
 
-    fallback() external payable { }
+    receive() external payable {
 
+    }
 }
