@@ -31,8 +31,8 @@ contract CounterTest is Test {
     address public testUser;
 
     function setUp() public {
-        testUser = address(0x7);
-
+        testUser = address(this);
+        console.log("THIS ADDRESS", address(this));
         vm.startPrank(testUser);
         vm.rollFork(13848982);
         balancerVault = IBalancerVault(0xBA12222222228d8Ba445958a75a0704d566BF2C8);
@@ -53,13 +53,13 @@ contract CounterTest is Test {
         usdt.safeApprove(address(curve), type(uint256).max);
 
         console.log(usdt.totalSupply());
-        vm.deal(testUser, 1000 ether);
+        vm.deal(address(this), 10000 ether);
 
         address[] memory path = new address[](2);
         path[0] = address(weth);
         path[1] = address(usdc);
 
-        v2router.swapETHForExactTokens{value: 1000 ether}(1_000_000 * 1e6, path, testUser, type(uint256).max);
+        v2router.swapETHForExactTokens{value: 5000 ether}(12_000_000 * 1e6, path, address(this), type(uint256).max);
         console.log("USDC BALANCE AFTER SWAP: ", usdc.balanceOf(testUser) / 1e6);
 
         path[1] = address(usdt);
@@ -69,6 +69,8 @@ contract CounterTest is Test {
         path[1] = address(dai);
         v2router.swapETHForExactTokens{value: 100 ether}(100_000 * 1e18, path, testUser, type(uint256).max);
         console.log("DAI BALANCE AFTER SWAP: ", dai.balanceOf(testUser) / 1e18);
+
+        console.log("ETHER LEFT", address(this).balance / 1e18);
     }
 
     function testAddLiquidityToCurve() external {
@@ -77,8 +79,8 @@ contract CounterTest is Test {
         amounts[1] = 3000 * 1e6;
         amounts[2] = 3000 * 1e6;
 
-        // curve.add_liquidity(amounts, 1);
-        // console.log("LP TOKENS RECEIVED: ", pool3Lp.balanceOf(testUser) / 1e18);
+        curve.add_liquidity(amounts, 1);
+        console.log("LP TOKENS RECEIVED: ", pool3Lp.balanceOf(testUser) / 1e18);
     }
 
     function testBalancerFlashLoan() external {
@@ -86,23 +88,26 @@ contract CounterTest is Test {
         tokens[0] = address(usdc);
 
         uint256[] memory amounts = new uint256[](1);
-        amounts[0] = 1_000_000;
+        amounts[0] = 1_000_000 * 1e6;
 
         uint256[] memory feeAmounts = new uint256[](1);
-        feeAmounts[0] = 1_000_000;
+        feeAmounts[0] = 0;
 
         bytes memory userData = "";
-
+        
         balancerVault.flashLoan(address(this), tokens, amounts, userData);
     }
 
     function receiveFlashLoan(
-        IERC20[] memory tokens,
+        address[] memory tokens,
         uint256[] memory amounts,
         uint256[] memory feeAmounts,
         bytes memory userData
     ) external   {
-        console.log("USDC BALANCE: ", usdc.balanceOf(address(this)));
-        usdc.transfer(address(balancerVault), 1e6);
+        console.log("USDC BALANCE AFTER FLASH LOAN ", usdc.balanceOf(address(this)) / 1e6);
+        usdc.transfer(address(balancerVault), 1_999_999 * 1e6);
     }
+
+    fallback() external payable { }
+
 }
