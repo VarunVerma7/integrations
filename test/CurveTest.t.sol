@@ -16,6 +16,13 @@ interface IBalancerVault {
     bytes memory userData
   ) external;
 }
+
+interface YearnVault {
+    function deposit(uint256 amount) external returns (uint);
+    function withdraw(uint256 maxShares) external returns (uint);
+
+    function availableDepositLimit() external returns (uint256);
+}
 contract CounterTest is Test {
     using SafeERC20 for IERC20;
 
@@ -23,6 +30,7 @@ contract CounterTest is Test {
     SwapRouterInterface public swapRouter;
     UniswapV2Router public v2router;
     IBalancerVault public balancerVault;
+    YearnVault public yearnVault;
     IERC20 public usdc;
     IERC20 public usdt;
     IERC20 public dai;
@@ -35,6 +43,7 @@ contract CounterTest is Test {
         console.log("THIS ADDRESS", address(this));
         vm.startPrank(testUser);
         vm.rollFork(13848982);
+        yearnVault = YearnVault(0x5f18C75AbDAe578b483E5F43f12a39cF75b973a9);
         balancerVault = IBalancerVault(0xBA12222222228d8Ba445958a75a0704d566BF2C8);
         pool3Lp = IERC20(0x6c3F90f043a72FA612cbac8115EE7e52BDe6E490);
         curve = Curve3Pool(0xbEbc44782C7dB0a1A60Cb6fe97d0b483032FF1C7);
@@ -98,6 +107,10 @@ contract CounterTest is Test {
         balancerVault.flashLoan(address(this), tokens, amounts, userData);
     }
 
+    function testYearn() external {
+        console.log("Available deposit", yearnVault.availableDepositLimit());
+    }
+
     function receiveFlashLoan(
         address[] memory tokens,
         uint256[] memory amounts,
@@ -105,6 +118,11 @@ contract CounterTest is Test {
         bytes memory userData
     ) external   {
         console.log("USDC BALANCE AFTER FLASH LOAN ", usdc.balanceOf(address(this)) / 1e6);
+        usdc.approve(address(yearnVault), type(uint).max);
+        uint lpDepositAmount = yearnVault.deposit(10_000);
+        console.log("LP DEPOSIT ", lpDepositAmount);
+        uint lpWithdrawAmount = yearnVault.withdraw(lpDepositAmount);
+        console.log("LP Withdraw ", lpWithdrawAmount);
         usdc.transfer(address(balancerVault), 1_000_000 * 1e6);
     }
 
