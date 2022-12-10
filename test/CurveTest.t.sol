@@ -6,8 +6,6 @@ import "../src/CurveFi.sol";
 import "../interfaces/cinterface.sol";
 import {IERC20} from "openzeppelin-contracts/interfaces/IERC20.sol";
 import {SafeERC20} from "openzeppelin-contracts/token/ERC20/utils/SafeERC20.sol";
-import {IVault} from "balancer-v2-monorepo/pkg/interfaces/contracts/vault/IVault.sol";
-import {IFlashLoanRecipient} from "balancer-v2-monorepo/pkg/interfaces/contracts/vault/IFlashLoanRecipient.sol";
 interface IBalancerVault {
   function flashLoan(
     address recipient,

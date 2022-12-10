@@ -21,6 +21,3 @@
 	path = lib/v3-periphery
 	url = https://github.com/Uniswap/v3-periphery
 	branch = v1.3.0
-[submodule "lib/balancer-v2-monorepo"]
-	path = lib/balancer-v2-monorepo
-	url = https://github.com/balancer-labs/balancer-v2-monorepo
